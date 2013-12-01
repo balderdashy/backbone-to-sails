@@ -177,6 +177,12 @@ Backbone.sync = function (method, model, options) {
 };
 
 
+	// TODO:
+	// Replace sails.io.js with `jQuery-to-sails.js`, which can be a prerequisite of 
+	// this SDK.
+	//
+	// Will allow for better client-side error handling, proper simulation of $.ajax,
+	// easier client-side support of headers, and overall a better experience.
 
 	/*
 	var simulatedXHR = $.Deferred();
