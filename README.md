@@ -106,10 +106,14 @@ Backbone.on('comet', function ( message ) {
 ### How Does It Work?
 
 ###### Talking to the Server (i.e. ajax)
-todo
+
+https://github.com/mikermcneil/backbone-to-sails/blob/master/sails.io.backbone.js#L31
 
 ###### Listening to the Server (i.e. comet)
-todo
+
+https://github.com/mikermcneil/backbone-to-sails/blob/master/sails.io.backbone.js#L45
+
+
 
 
 
