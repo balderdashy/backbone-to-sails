@@ -109,8 +109,41 @@ Backbone.sync = function (method, model, options) {
 
 
 
-	// If your connected socket exists on a different variable, change here:
-	var io = model.socket || Backbone.socket || window.socket;
+	// Locate the active `socket`
+	// (if your connected socket exists on a different variable, change here)
+	var socket, socketSrc;
+	if (model.socket) {
+		socket = model.socket;
+		socketSrc = 'the `socket` property of one of its models';
+	}
+	else if (Backbone.socket) {
+		socket = model.socket;
+		socketSrc = '`Backbone.socket`';
+	}
+	else if (window.socket) {
+		socket = window.socket;
+		socketSrc = '`window.socket`';
+	}
+	else throw new Error(
+		'\n' +
+		'Backbone cannot find a suitable `socket` object.\n' +
+		'This SDK expects the active socket to be located at `window.socket`, '+
+		'`Backbone.socket` or the `socket` property\n' +
+		'of the Backbone model or collection attempting to communicate w/ the server.\n'
+	);
+
+
+
+	// Ensure the socket is connected and able to communicate w/ the server.
+	if ( !socket.socket || !socket.socket.connected ) throw new Error(
+		'\n' +
+		'Backbone is trying to communicate with the Sails server using '+ socketSrc +',\n'+
+		'but it\'s `connected` property is still set to false.\n' +
+		'But maybe Socket.io just hasn\'t finished connecting yet?\n' +
+		'\n' +
+		'You might check to be sure you\'re waiting for `socket.on(\'connect\')`\n' +
+		'before using sync methods on your Backbone models and collections.'
+	);
 
 
 
@@ -141,6 +174,7 @@ Backbone.sync = function (method, model, options) {
 
 
 	return simulatedXHR;
+};
 
 
 
@@ -175,8 +209,5 @@ Backbone.sync = function (method, model, options) {
 	// Return a promise to allow chaining of sync methods.
 	return promise;
 	*/
-};
-
-
 
 
