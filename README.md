@@ -105,6 +105,10 @@ Backbone.on('comet', function ( message ) {
 
 ### How Does It Work?
 
+###### Connecting to the Server
+
+https://github.com/mikermcneil/backbone-to-sails/blob/master/sails.io.backbone.js#L21
+
 ###### Talking to the Server (i.e. ajax)
 
 https://github.com/mikermcneil/backbone-to-sails/blob/master/sails.io.backbone.js#L31
