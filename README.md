@@ -105,18 +105,45 @@ Backbone.on('comet', function ( message ) {
 
 ### How Does It Work?
 
-###### Connecting to the Server
-
-https://github.com/mikermcneil/backbone-to-sails/blob/master/sails.io.backbone.js#L21
-
-###### Talking to the Server (i.e. ajax)
-
-https://github.com/mikermcneil/backbone-to-sails/blob/master/sails.io.backbone.js#L31
-
-###### Listening to the Server (i.e. comet)
-
-https://github.com/mikermcneil/backbone-to-sails/blob/master/sails.io.backbone.js#L45
-
+```
+ * ### Connecting
+ * > i.e. What do I have to do to get started?
+ *
+ * Currently, this SDK expects active socket to be located at
+ * `window.socket`, `Backbone.socket` or the `socket` property on 
+ * the instance of the specific model/collection communicating w/
+ * the server.  See inline comments if you want to change it.
+ *
+ *
+ *
+ * ### Talking to the Server
+ * i.e. How does this send messages to the Sails server?
+ *
+ * This client will emit socket requests to URLs, which will be 
+ * interpreted and routed by Sails accordingly, whether they are
+ * to custom URLs in your routes.js file or automatic API blueprints.
+ * 
+ * e.g. if your Backbone collection's URL is '/todo', calling `fetch()`
+ * will still contact the Sails backend at `GET /todo`-- but now it will
+ * use Socket.io to emit a packet on the connected socket instead of 
+ * sending an HTTP request.
+ *
+ *
+ *
+ * ### Listening to the Server
+ * > i.e. What happens when comet messages arrive?
+ *
+ * When your Sails publishes a message using `Foo.publish`, the name of
+ * the socket event is always 'message'. This SDK examines all incoming
+ * messages from Sails, then triggers a `comet` event on the `Backbone` 
+ * global.  You can listen for these events like so:
+ *
+ * Backbone.on('comet', function sailsPublishedSomething ( message ) {
+ *		// do different stuff depending on what's in `message`
+ *		// (could be a string or an object)
+ * })`
+ */
+```
 
 
 
