@@ -55,22 +55,6 @@
  *		// (could be a string or an object)
  * })`
  *
- *
- *
- * ### Roadmap
- * > i.e. What's next?
- *
- * I wanted to start small and make sure the first version
- * was simple and clean, and didn't touch more of the Backbone core than 
- * absolutely necessary.
- *
- * +	Built-in auto-sync for collections/models, accomplished by expecting
- *		a standard CRUD-compatible format in the published messages from the
- *		server.
- *
- * +	Ability to pass in a connected socket as an option to fetch/save/etc.
- *		as an alternative to stuffing it in window.socket, Backbone.socket, etc.
- *
  * @name sync
  */
 
