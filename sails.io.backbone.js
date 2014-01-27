@@ -200,7 +200,7 @@
 				if (options.success) options.success(response);
 			}, verb);
 
-
+    model.trigger('request', model, simulatedXHR, options);
 
 		return simulatedXHR;
 	};
