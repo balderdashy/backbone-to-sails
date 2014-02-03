@@ -25,6 +25,19 @@
 
 
 
+	// Used to simplify app-level connection logic-- i.e. so you don't
+	// have to wait for the socket to be connected to start trying to 
+	// synchronize data.
+	var requestQueue = [];
+
+
+
+	// A `setTimeout` that, if necessary, is used to check if the socket
+	// is ready yet (polls).
+	var socketTimer;
+
+
+
 	/**
 	 * _acquireSocket()
 	 *
@@ -47,6 +60,47 @@
 
 		// The first time a socket is acquired, bind comet listener
 		if (socket) _bindCometListener();
+	};
+
+
+
+	/**
+	 * Checks if the socket is ready- if so, runs the request queue.
+	 * If not, sets the timer again.
+	 */
+	var _keepTryingToRunRequestQueue = function ( ) {
+		clearTimeout(socketTimer);
+
+		// Check if socket is connected (synchronous)
+		var socketIsConnected = socket.socket && socket.socket.connected;
+
+
+		if (socketIsConnected) {
+			
+			// Run the request queue
+			_.each(requestQueue, function (request) {
+				Backbone.sync(request.method, request.model, request.options);
+			});
+		}
+		else {
+
+			// Reset the timer
+			socketTimer = setTimeout(_keepTryingToRunRequestQueue, 250);
+
+			// TODO:
+			// After a configurable period of time, if the socket has still not connected,
+			// throw an error, since the `socket` might be improperly configured.
+
+			// throw new Error(
+			// 	'\n' +
+			// 	'Backbone is trying to communicate with the Sails server using '+ socketSrc +',\n'+
+			// 	'but its `connected` property is still set to false.\n' +
+			// 	'But maybe Socket.io just hasn\'t finished connecting yet?\n' +
+			// 	'\n' +
+			// 	'You might check to be sure you\'re waiting for `socket.on(\'connect\')`\n' +
+			// 	'before using sync methods on your Backbone models and collections.'
+			// );
+		}
 	};
 
 
@@ -118,6 +172,48 @@
 
 
 
+
+		// If socket is not defined yet, try to grab it again.
+		_acquireSocket();
+
+
+
+		// Handle missing socket
+		if (!socket) {
+			throw new Error(
+				'\n' +
+				'Backbone cannot find a suitable `socket` object.\n' +
+				'This SDK expects the active socket to be located at `window.socket`, '+
+				'`Backbone.socket` or the `socket` property\n' +
+				'of the Backbone model or collection attempting to communicate w/ the server.\n'
+			);
+		}
+
+
+
+		// Ensures the socket is connected and able to communicate w/ the server.
+		// 
+		var socketIsConnected = socket.socket && socket.socket.connected;
+		if ( !socketIsConnected ) {
+
+			// If the socket is not connected, the request is queued
+			// (so it can be replayed when the socket comes online.)
+			requestQueue.push({
+				method: method,
+				model: model,
+				options: options
+			});
+
+
+			// If we haven't already, start polling the socket to see if it's ready
+			_keepTryingToRunRequestQueue();
+
+			return;
+		}
+
+
+
+
 		// Get the actual URL (call `.url()` if it's a function)
 		var url;
 		if (options.url) {
@@ -144,41 +240,6 @@
 		}
 
 
-
-		// If socket is not defined yet, try to grab it
-		_acquireSocket();
-
-
-
-		// Handle missing socket
-		if (!socket) {
-			throw new Error(
-				'\n' +
-				'Backbone cannot find a suitable `socket` object.\n' +
-				'This SDK expects the active socket to be located at `window.socket`, '+
-				'`Backbone.socket` or the `socket` property\n' +
-				'of the Backbone model or collection attempting to communicate w/ the server.\n'
-			);
-		}
-
-
-
-		// Ensure the socket is connected and able to communicate w/ the server.
-		var socketIsConnected = socket.socket && socket.socket.connected;
-		if ( !socketIsConnected ) {
-			throw new Error(
-				'\n' +
-				'Backbone is trying to communicate with the Sails server using '+ socketSrc +',\n'+
-				'but its `connected` property is still set to false.\n' +
-				'But maybe Socket.io just hasn\'t finished connecting yet?\n' +
-				'\n' +
-				'You might check to be sure you\'re waiting for `socket.on(\'connect\')`\n' +
-				'before using sync methods on your Backbone models and collections.'
-			);
-		}
-
-
-
 		// Map Backbone's concept of CRUD methods to HTTP verbs
 		var verb;
 		switch (method) {
@@ -203,8 +264,13 @@
 				if (options.success) options.success(response);
 			}, verb);
 
+
+
+		// Trigget the `request` event on the Backbone model
     model.trigger('request', model, simulatedXHR, options);
 
+
+    
 		return simulatedXHR;
 	};
 
