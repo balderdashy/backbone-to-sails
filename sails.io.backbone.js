@@ -164,15 +164,18 @@
 
 
 		// Ensure the socket is connected and able to communicate w/ the server.
-		if ( !socket.socket || !socket.socket.connected ) throw new Error(
-			'\n' +
-			'Backbone is trying to communicate with the Sails server using '+ socketSrc +',\n'+
-			'but it\'s `connected` property is still set to false.\n' +
-			'But maybe Socket.io just hasn\'t finished connecting yet?\n' +
-			'\n' +
-			'You might check to be sure you\'re waiting for `socket.on(\'connect\')`\n' +
-			'before using sync methods on your Backbone models and collections.'
-		);
+		var socketIsConnected = socket.socket && socket.socket.connected;
+		if ( !socketIsConnected ) {
+			throw new Error(
+				'\n' +
+				'Backbone is trying to communicate with the Sails server using '+ socketSrc +',\n'+
+				'but its `connected` property is still set to false.\n' +
+				'But maybe Socket.io just hasn\'t finished connecting yet?\n' +
+				'\n' +
+				'You might check to be sure you\'re waiting for `socket.on(\'connect\')`\n' +
+				'before using sync methods on your Backbone models and collections.'
+			);
+		}
 
 
 
