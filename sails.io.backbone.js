@@ -238,6 +238,10 @@
 		if (options.patch === true && options.data.id === null && model) {
 			params.id = model.id;
 		}
+		
+		if (options.data) {
+			_(params).extend(options.data);
+		}
 
 
 		// Map Backbone's concept of CRUD methods to HTTP verbs
