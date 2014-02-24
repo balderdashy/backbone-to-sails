@@ -235,11 +235,11 @@
 			params = options.attrs || model.toJSON(options) || {};
 		}
 
-		if (options.patch === true && options.data.id === null && model) {
+		if (options.patch === true && _.isObject(options.data) && options.data.id === null && model) {
 			params.id = model.id;
 		}
 		
-		if (options.data) {
+		if (_.isObject(options.data)) {
 			_(params).extend(options.data);
 		}
 
